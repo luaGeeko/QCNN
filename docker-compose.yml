@@ -1,0 +1,12 @@
+version: '3.4'
+
+services:
+  app:
+    build:
+      context: .
+      target: local
+    volumes:
+      - .:/app
+      - ~/.bash_history:/root/.bash_history
+      - ~/.cache/pypoetry:/root/.cache/pypoetry
+      - ~/.ipython:/root/.ipython
