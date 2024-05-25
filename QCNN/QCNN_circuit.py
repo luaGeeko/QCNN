@@ -38,6 +38,7 @@ def pooling_layer3(V, params):
     V(params, wires=[0, 4])
 
 
+# params : are the trainable params for the circuit
 def QCNN_structure(U, params, U_params):
     param1 = params[0:U_params]
     param2 = params[U_params : 2 * U_params]
@@ -88,7 +89,7 @@ def QCNN(X, params, U, U_params, embedding_type="Amplitude", cost_fn="cross_entr
 
     # Data Embedding
     embedding.data_embedding(X, embedding_type=embedding_type)
-
+    breakpoint()
     # Quantum Convolutional Neural Network
     if U == "U_TTN":
         QCNN_structure(unitary.U_TTN, params, U_params)

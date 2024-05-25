@@ -1,5 +1,5 @@
 # Loads and Processes the data that will be used in QCNN and Hierarchical Classifier Training
-from typing import List
+from typing import List, Optional
 
 import logging
 import numpy as np
@@ -32,11 +32,24 @@ pca12 = ["pca12-1", "pca12-2", "pca12-3", "pca12-4"]
 autoencoder12 = ["autoencoder12-1", "autoencoder12-2", "autoencoder12-3", "autoencoder12-4"]
 
 
+def clean_dataset_for_duplicates():
+    pass
+
+
+def create_quantum_states(label):
+    """Create quantum states for the given label"""
+    binary_label = "{0:04b}".format(label)
+    state = np.array([int(bit) for bit in binary_label])
+    return state
+
+
 def data_load_and_process(
     dataset: str = "mnist",
     classes: str = "all",
     feature_reduction: str = "resize256",
     binary: bool = True,
+    generate_tsne_plot: Optional[bool] = False,
+    tsne_components: Optional[int] = 2,
 ):
     if dataset == "fashion_mnist":
         (x_train, y_train), (x_test, y_test) = tf.keras.datasets.fashion_mnist.load_data()
@@ -52,6 +65,14 @@ def data_load_and_process(
         )
     # normalize the images data
     x_train, x_test = x_train[..., np.newaxis] / 255.0, x_test[..., np.newaxis] / 255.0
+
+    if classes == "all":
+        logger.info(f"{classes} has been selected for the dataset!")
+        # need to create labels for all the classes, we need 4 qubits to encode labels
+        X_train = x_train
+        X_test = x_test
+        Y_train = np.array([create_quantum_states(label) for label in y_train])
+        Y_test = np.array([create_quantum_states(label) for label in y_test])
 
     if classes == "odd_even":
         odd = [1, 3, 5, 7, 9]
@@ -77,6 +98,7 @@ def data_load_and_process(
 
     elif classes == "0_1":
         class_value = [0, 1]
+        logger.info(f"{classes} with {class_value} has been selected for the dataset!")
         x_train_filter_01 = np.where((y_train == classes[0]) | (y_train == class_value[1]))
         x_test_filter_01 = np.where((y_test == classes[0]) | (y_test == class_value[1]))
 
@@ -86,19 +108,21 @@ def data_load_and_process(
         if binary == False:
             Y_train = [1 if y == class_value[0] else 0 for y in Y_train]
             Y_test = [1 if y == class_value[0] else 0 for y in Y_test]
+
         elif binary == True:
             Y_train = [1 if y == class_value[0] else -1 for y in Y_train]
             Y_test = [1 if y == class_value[0] else -1 for y in Y_test]
 
-    # tsne without any feature reduction
-    n_components = 2
-    tsne = TSNE(n_components=n_components, random_state=0)
-    x_train_tsne = tsne.fit_transform(x_train.reshape(x_train.shape[0], -1))
-    df_tsne = pd.DataFrame(x_train_tsne, columns=["TSNE1", "TSNE2"])
-    df_tsne["label"] = y_train
+    if generate_tsne_plot:
+        # tsne without any feature reduction
+        n_components = tsne_components
+        tsne = TSNE(n_components=n_components, random_state=0)
+        x_train_tsne = tsne.fit_transform(x_train.reshape(x_train.shape[0], -1))
+        df_tsne = pd.DataFrame(x_train_tsne, columns=["TSNE1", "TSNE2"])
+        df_tsne["label"] = y_train
 
-    fig = px.scatter(df_tsne, x="TSNE1", y="TSNE2", color="label", title="t-SNE of MNIST")
-    fig.write_image("tsne_mnist_plot.png")
+        fig = px.scatter(df_tsne, x="TSNE1", y="TSNE2", color="label", title="t-SNE of MNIST")
+        fig.write_image("tsne_mnist_plot.png")
 
     if feature_reduction == "resize256":
         X_train = tf.image.resize(X_train[:], (256, 1)).numpy()

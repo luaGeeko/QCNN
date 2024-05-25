@@ -1,6 +1,7 @@
 import data
 import Hierarchical_circuit
 import numpy as np
+import pennylane as qml
 import QCNN_circuit
 import Training
 
@@ -153,7 +154,6 @@ def Benchmarking(
             X_train, X_test, Y_train, Y_test = data.data_load_and_process(
                 dataset, classes=classes, feature_reduction=Encoding, binary=binary
             )
-
             print("\n")
             print(
                 "Loss History for "
@@ -170,6 +170,12 @@ def Benchmarking(
             )
 
             if circuit == "QCNN":
+                x_sample = X_test[0].reshape(1, X_test[0].shape[0])
+                fig, ax = qml.draw_mpl(QCNN_circuit.QCNN)(
+                    x_sample, trained_params, U, U_params, Embedding, cost_fn
+                )
+                fig.savefig("circuit.png", dpi=fig.dpi)
+                breakpoint()
                 predictions = [
                     QCNN_circuit.QCNN(x, trained_params, U, U_params, Embedding, cost_fn)
                     for x in X_test
