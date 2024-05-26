@@ -71,8 +71,10 @@ def data_load_and_process(
         # need to create labels for all the classes, we need 4 qubits to encode labels
         X_train = x_train
         X_test = x_test
-        Y_train = np.array([create_quantum_states(label) for label in y_train])
-        Y_test = np.array([create_quantum_states(label) for label in y_test])
+        Y_train = y_train
+        Y_test = y_test
+        # Y_train = np.array([create_quantum_states(label) for label in y_train])
+        # Y_test = np.array([create_quantum_states(label) for label in y_test])
 
     if classes == "odd_even":
         odd = [1, 3, 5, 7, 9]

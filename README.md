@@ -31,3 +31,11 @@ Hybrid Direct Embedding and Hybrid Angle Embedding have variations depending on 
 
 Binary: "True" uses 1 and -1 labels, while "False" uses 1 and 0 labels. When using cross entropy cost function always use "False".
 When using mse cost function "True" in result for paper, but "False" can also be used.
+
+### 4. Using Docker Build
+1. Install docker and docker compose according to your system requirements
+2. Clone the repository in your system
+3. `cd QCNN` ---> `sudo docker compose build` OR `sudo docker-compose build`, same commands but depends on docker installation
+4. Once the docker builds the image `sudo docker compose run --rm app bash`
+5. `python result.py` --> entry point script for training any of the QCNN model and contains initial parameters needed, default have been set.
+6. To train for multi - class [WIP] model `"U_SU4_mod"`, `classes = "all"`, `multi_class = True`

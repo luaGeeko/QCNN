@@ -14,17 +14,17 @@ cost_fn: 'mse' or 'cross_entropy'
 Note: when using 'mse' as cost_fn binary="True" is recommended, when using 'cross_entropy' as cost_fn must be binary="False".
 """
 
-# Unitaries = ["U_SU4", "U_SU4_1D", "U_SU4_no_pooling", "U_9_1D"]
-Unitaries = ["U_SU4"]
-# U_num_params = [15, 15, 15, 2]
-U_num_params = [15]
+Unitaries = ["U_SU4", "U_SU4_1D", "U_SU4_no_pooling", "U_9_1D"]
+U_num_params = [15, 15, 15, 2]
 Encodings = ["resize256"]
 # dataset = "fashion_mnist"
 dataset = "mnist"
-# classes = "0_1"
-classes = "all"
-binary = False
+classes = "0_1"
+# classes = "all"
+binary = True
+multi_class = False
 cost_fn = "cross_entropy"
+plot_circuit = True
 
 Benchmarking.Benchmarking(
     dataset,
@@ -33,7 +33,9 @@ Benchmarking.Benchmarking(
     U_num_params,
     Encodings,
     circuit="QCNN",
+    multi_class=multi_class,
     cost_fn=cost_fn,
     binary=binary,
+    plot_circuit=plot_circuit,
 )
 # Benchmarking.Benchmarking(dataset, classes, Unitaries, U_num_params, Encodings, circuit='Hierarchical', cost_fn=cost_fn, binary=binary)

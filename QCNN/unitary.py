@@ -109,3 +109,7 @@ def Pooling_ansatz2(wires):  # 0 params
 
 def Pooling_ansatz3(*params, wires):  # 3 params
     qml.CRot(*params, wires=[wires[0], wires[1]])
+
+
+def Pooling_ansatz_modified(params, wires):  # 3 parameters for CRot gate
+    qml.CRot(params[0], params[1], params[2], wires=[wires[0], wires[1]])

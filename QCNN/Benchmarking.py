@@ -1,3 +1,5 @@
+from typing import Optional
+
 import data
 import Hierarchical_circuit
 import numpy as np
@@ -6,7 +8,7 @@ import QCNN_circuit
 import Training
 
 
-def accuracy_test(predictions, labels, cost_fn, binary=True):
+def accuracy_test(predictions, labels, cost_fn, binary: bool, multi_class: bool):
     if cost_fn == "mse":
         if binary == True:
             acc = 0
@@ -30,6 +32,13 @@ def accuracy_test(predictions, labels, cost_fn, binary=True):
             else:
                 P = 1
             if P == l:
+                acc = acc + 1
+        return acc / len(labels)
+    # FIXME
+    elif cost_fn == "cross_entropy" and multi_class and not binary:
+        acc = 0
+        for l, p in zip(labels, predictions):
+            if np.argmax(p) == l:
                 acc = acc + 1
         return acc / len(labels)
 
@@ -138,7 +147,16 @@ def Encoding_to_Embedding(Encoding):
 
 
 def Benchmarking(
-    dataset, classes, Unitaries, U_num_params, Encodings, circuit, cost_fn, binary=True
+    dataset,
+    classes,
+    Unitaries,
+    U_num_params,
+    Encodings,
+    circuit,
+    cost_fn,
+    multi_class: bool,
+    binary: bool,
+    plot_circuit: bool,
 ):
     I = len(Unitaries)
     J = len(Encodings)
@@ -170,17 +188,23 @@ def Benchmarking(
             )
 
             if circuit == "QCNN":
-                x_sample = X_test[0].reshape(1, X_test[0].shape[0])
-                fig, ax = qml.draw_mpl(QCNN_circuit.QCNN)(
-                    x_sample, trained_params, U, U_params, Embedding, cost_fn
-                )
-                fig.savefig("circuit.png", dpi=fig.dpi)
-                breakpoint()
+                if plot_circuit:
+                    x_sample = X_test[0].reshape(1, X_test[0].shape[0])
+                    fig, ax = qml.draw_mpl(QCNN_circuit.QCNN)(
+                        x_sample, trained_params, U, U_params, Embedding, cost_fn
+                    )
+                    fig.savefig(f"{U}_circuit.png", dpi=fig.dpi)
                 predictions = [
                     QCNN_circuit.QCNN(x, trained_params, U, U_params, Embedding, cost_fn)
                     for x in X_test
                 ]
             elif circuit == "Hierarchical":
+                if plot_circuit:
+                    x_sample = X_test[0].reshape(1, X_test[0].shape[0])
+                    fig, ax = qml.draw_mpl(Hierarchical_circuit.Hierarchical_classifier)(
+                        x_sample, trained_params, U, U_params, Embedding, cost_fn
+                    )
+                    fig.savefig(f"{U}_circuit.png", dpi=fig.dpi)
                 predictions = [
                     Hierarchical_circuit.Hierarchical_classifier(
                         x, trained_params, U, U_params, Embedding, cost_fn
@@ -188,7 +212,9 @@ def Benchmarking(
                     for x in X_test
                 ]
 
-            accuracy = accuracy_test(predictions, Y_test, cost_fn, binary)
+            accuracy = accuracy_test(
+                predictions, Y_test, cost_fn, binary=binary, multi_class=multi_class
+            )
             print("Accuracy for " + U + " " + Encoding + " :" + str(accuracy))
 
             f.write(
