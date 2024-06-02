@@ -1,0 +1,8 @@
+Accuracy History for QCNN circuits, U_SU4_mod resize256 with cross_entropy
+[0.098, 0.119, 0.122, 0.117, 0.118, 0.125, 0.132, 0.137, 0.139, 0.141, 0.145, 0.143, 0.142, 0.144, 0.145, 0.147, 0.147, 0.152, 0.153, 0.155, 0.154, 0.159, 0.158, 0.156, 0.158, 0.161, 0.163, 0.165, 0.166, 0.168]
+Accuracy for U_SU4_mod resize256 :0.138
+
+Accuracy History for QCNN circuits, U_SU4_mod resize256 with cross_entropy
+[0.025]
+Accuracy for U_SU4_mod resize256 :0.07
+

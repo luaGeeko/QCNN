@@ -43,6 +43,7 @@ def conv_layer3(U, params):
 
 def conv_layer3_modified(U, params):
     U(params, wires=[0, 4])
+    U(params, wires=[4, 2])
 
 
 # Quantum Circuits for Pooling layers
@@ -87,21 +88,24 @@ def QCNN_structure(U, params, U_params):
 
 
 def QCNN_structure_modified(U, params, U_params):
-    param1 = params[0:U_params]
-    param2 = params[U_params : 2 * U_params]
-    param3 = params[2 * U_params : 3 * U_params]
-    param4 = params[3 * U_params : 3 * U_params + 3]
-    param5 = params[3 * U_params + 3 : 3 * U_params + 6]
+    param1 = params[0:U_params]  # 15 params
+    param2 = params[U_params : 2 * U_params]  # 15 params
+    param3 = params[2 * U_params : 3 * U_params]  # 15 params
+    param4 = params[3 * U_params : 3 * U_params + 2]  # 2 params
+    param5 = params[3 * U_params + 2 : 3 * U_params + 4]  # 2 params
+    param6 = params[3 * U_params + 4 : 3 * U_params + 6]  # 2 params
 
-    logger.debug(f"total params -- {params.shape} U_params {U_params}")
-    logger.debug(
-        f"Params: {param1.shape} {param2.shape} {param3.shape} {param4.shape} {param5.shape}"
-    )
-
-    conv_layer1_modified(U, param1)
-    pooling_layer1_modified(unitary.Pooling_ansatz_modified, param4)
-    conv_layer2_modified(U, param2)
-    pooling_layer2_modified(unitary.Pooling_ansatz_modified, param5)
+    # logger.debug(f"total params -- {params.shape} U_params {U_params}")
+    # logger.debug(
+    #     f"Params: {param1.shape} {param2.shape} {param3.shape} {param4.shape} {param5.shape}"
+    # )
+    # layer 1
+    conv_layer1(U, param1)
+    pooling_layer1(unitary.Pooling_ansatz1, param4)
+    # layer 2
+    conv_layer2(U, param2)
+    pooling_layer2(unitary.Pooling_ansatz1, param5)
+    # layer 3
     conv_layer3_modified(U, param3)
 
 

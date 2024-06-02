@@ -1,8 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from Benchmarking import Encoding_to_Embedding
-from data import data_load_and_process
-from Training import circuit_training
+
+from QCNN.Benchmarking import Encoding_to_Embedding
+from QCNN.data import data_load_and_process
+from QCNN.Training import circuit_training
 
 # Loss histories in order of pca8, autoencoder8, pca16, autoencoder16
 loss_histories_CNN_MNIST = np.array(

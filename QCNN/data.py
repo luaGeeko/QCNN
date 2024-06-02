@@ -67,14 +67,15 @@ def data_load_and_process(
     x_train, x_test = x_train[..., np.newaxis] / 255.0, x_test[..., np.newaxis] / 255.0
 
     if classes == "all":
-        logger.info(f"{classes} has been selected for the dataset!")
+        datasize = 1000
+        logger.info(
+            f"{classes} has been selected for the dataset! taking only {datasize} samples for now"
+        )
         # need to create labels for all the classes, we need 4 qubits to encode labels
-        X_train = x_train
-        X_test = x_test
-        Y_train = y_train
-        Y_test = y_test
-        # Y_train = np.array([create_quantum_states(label) for label in y_train])
-        # Y_test = np.array([create_quantum_states(label) for label in y_test])
+        X_train = x_train[:datasize]
+        X_test = x_test[:datasize]
+        Y_train = y_train[:datasize]
+        Y_test = y_test[:datasize]
 
     if classes == "odd_even":
         odd = [1, 3, 5, 7, 9]

@@ -8,6 +8,12 @@ import QCNN_circuit
 import Training
 
 
+def softmax_1(x):
+    """Compute softmax values for each sets of scores in x."""
+    e_x = np.exp(x - np.max(x))
+    return e_x / e_x.sum(axis=0)
+
+
 def accuracy_test(predictions, labels, cost_fn, binary: bool, multi_class: bool):
     if cost_fn == "mse":
         if binary == True:
@@ -24,7 +30,7 @@ def accuracy_test(predictions, labels, cost_fn, binary: bool, multi_class: bool)
                     acc = acc + 1
             return acc / len(labels)
 
-    elif cost_fn == "cross_entropy":
+    elif cost_fn == "cross_entropy" and not multi_class and binary:
         acc = 0
         for l, p in zip(labels, predictions):
             if p[0] > p[1]:
@@ -34,11 +40,11 @@ def accuracy_test(predictions, labels, cost_fn, binary: bool, multi_class: bool)
             if P == l:
                 acc = acc + 1
         return acc / len(labels)
-    # FIXME
+
     elif cost_fn == "cross_entropy" and multi_class and not binary:
         acc = 0
-        for l, p in zip(labels, predictions):
-            if np.argmax(p) == l:
+        for label, pred in zip(labels, predictions):
+            if np.argmax(pred) == label:
                 acc = acc + 1
         return acc / len(labels)
 
@@ -163,7 +169,8 @@ def Benchmarking(
 
     for i in range(I):
         for j in range(J):
-            f = open("Result/result.txt", "a")
+            loss_f = open("Result/loss_result.txt", "a")
+            acc_f = open("Result/accuracy_result.txt", "a")
             U = Unitaries[i]
             U_params = U_num_params[i]
             Encoding = Encodings[j]
@@ -183,10 +190,10 @@ def Benchmarking(
                 + " with "
                 + cost_fn
             )
-            loss_history, trained_params = Training.circuit_training(
+
+            loss_history, acc_history, trained_params = Training.circuit_training(
                 X_train, Y_train, U, U_params, Embedding, circuit, cost_fn
             )
-
             if circuit == "QCNN":
                 if plot_circuit:
                     x_sample = X_test[0].reshape(1, X_test[0].shape[0])
@@ -195,7 +202,7 @@ def Benchmarking(
                     )
                     fig.savefig(f"{U}_circuit.png", dpi=fig.dpi)
                 predictions = [
-                    QCNN_circuit.QCNN(x, trained_params, U, U_params, Embedding, cost_fn)
+                    QCNN_circuit.QCNN(x, trained_params, U, U_params, Embedding, cost_fn)[:10]
                     for x in X_test
                 ]
             elif circuit == "Hierarchical":
@@ -211,13 +218,15 @@ def Benchmarking(
                     )
                     for x in X_test
                 ]
-
+            # predictions are to be converted to softmax probabilities
+            softmax_predictions = [softmax_1(p) for p in predictions]
             accuracy = accuracy_test(
-                predictions, Y_test, cost_fn, binary=binary, multi_class=multi_class
+                softmax_predictions, Y_test, cost_fn, binary=binary, multi_class=multi_class
             )
-            print("Accuracy for " + U + " " + Encoding + " :" + str(accuracy))
+            print("Test Accuracy for " + U + " " + Encoding + " :" + str(accuracy))
 
-            f.write(
+            # write loss history to plot later
+            loss_f.write(
                 "Loss History for "
                 + circuit
                 + " circuits, "
@@ -227,13 +236,31 @@ def Benchmarking(
                 + " with "
                 + cost_fn
             )
-            f.write("\n")
-            f.write(str(loss_history))
-            f.write("\n")
-            f.write("Accuracy for " + U + " " + Encoding + " :" + str(accuracy))
-            f.write("\n")
-            f.write("\n")
-    f.close()
+            loss_f.write("\n")
+            loss_f.write(str(loss_history))
+            loss_f.write("\n")
+            loss_f.write("\n")
+
+            # write accuracy history to plot later
+            acc_f.write(
+                "Accuracy History for "
+                + circuit
+                + " circuits, "
+                + U
+                + " "
+                + Encoding
+                + " with "
+                + cost_fn
+            )
+            acc_f.write("\n")
+            acc_f.write(str(acc_history))
+            acc_f.write("\n")
+            acc_f.write("Accuracy for " + U + " " + Encoding + " :" + str(accuracy))
+            acc_f.write("\n")
+            acc_f.write("\n")
+
+    loss_f.close()
+    acc_f.close()
 
 
 def Data_norm(dataset, classes, Encodings, binary=True):
